@@ -78,12 +78,9 @@ class ChapterParser():
         t1.join()
         t2.join()
 
-        blocks = [{
-                        'startTime': 0,
-                        'title': f'Commercial Block 1'
-                    }]
+        blocks = []
 
-        count = 2
+        count = 1
         for time in black_spots:
             distance = abs(time - self._get_closest_val(time, silence_spots))
             if distance <= 1 and time > self.start_threshold and duration - time > self.end_threshold:
