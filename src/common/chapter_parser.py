@@ -2,6 +2,7 @@ import ffmpeg
 import re
 from threading import Thread
 from subprocess import Popen
+import os
 
 SCREEN = "SCREEN"
 AUDIO = "AUDIO"
@@ -64,6 +65,7 @@ class ChapterParser():
         return self.detect_null_av(file, AUDIO, result, n="-50dB", d=0.001)
 
     def get_commercial_blocks(self, file: str):
+        print("RETRIEVING COMMERCIAL BLOCKS")
         duration = float(ffmpeg.probe(file).get('format', {}).get('duration', 0))
 
         black_spots = []
@@ -95,11 +97,11 @@ class ChapterParser():
                 )
 
                 count += 1
-
+        print("RETRIEVED")
         return duration, blocks
 
 
-    def insert_chapter_markers(self, file: str):
+    def insert_chapter_markers(self, file: str, root_dir: str):
         duration, chapters = self.get_commercial_blocks(file)
         text = ""
         chapter_count = len(chapters)
@@ -130,5 +132,5 @@ title={title}
         
         print("APPLYING METADATA...")
         stream = ffmpeg.input(file)
-        stream = ffmpeg.output(stream, f"/mnt/a/output/{file.rsplit('/', 1)[1]}", i = 'FFMETADATAFILE', map_metadata = 1, codec = 'copy')
+        stream = ffmpeg.output(stream, os.path.join(root_dir, 'Chapters', f"{file.rsplit('/', 1)[1]}"), i = 'FFMETADATAFILE', map_metadata = 1, codec = 'copy')
         ffmpeg.run(stream, overwrite_output=True, quiet=True)

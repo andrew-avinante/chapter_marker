@@ -1,0 +1,53 @@
+name: CI/CD
+
+on: 
+  push:
+  workflow_dispatch:
+    inputs:
+      increment_version:
+        type: choice
+        description: Increment version
+        options:
+          - minor
+          - patch
+        default: 'patch'
+      release:
+        type: boolean
+        description: Release
+
+jobs:
+  build-and-test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          source ./.venv/bin/activate
+          pip install -r requirements.txt
+      - name: Build and deploy
+        if: github.ref == 'refs/heads/master' &&  github.event.inputs.release == 'true'
+        run: |
+          source ./.venv/bin/activate
+          pip install wheel
+          python setup.py sdist bdist_wheel
+
+          twine upload --repository-url=${{ secrets.NEXUS_REPO }} -u ${{ secrets.NEXUS_USERNAME }} -p ${{ secrets.NEXUS_PASSWORD }} dist/*
+
+      - name: Tag
+        if: github.ref == 'refs/heads/master' &&  github.event.inputs.release == 'true'
+        run: |
+          version=$(cat VERSION)
+          if [[ github.event.inputs.increment_version == 'patch' ]]; then
+            awk -F. -v OFS=. '{$3 = $3 + 1; print}' VERSION > VERSION.tmp && mv VERSION.tmp VERSION
+          else
+            awk -F. -v OFS=. '{$2 = $2 + 1; print}' VERSION > VERSION.tmp && mv VERSION.tmp VERSION
+          fi
+
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "$GITHUB_ACTOR"
+          git add VERSION
+          git commit -m "Setting new version after release"
+          git tag v$version
+          git push "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" --follow-tags
+          git push "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" --tags

@@ -1,1 +1,5 @@
+--extra-index-url https://nexus.crookedcactus.net/repository/pypi-group/simple
+media-lib==1.0.0
+kafka-python==2.0.2
+twine==4.0.2
 ffmpeg-python==0.2.0
