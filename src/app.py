@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from common.chapter_parser import ChapterParser
+from src.common.chapter_parser import ChapterParser
 from media_lib.utils.event_util import load_queue, send_event
 from media_lib.events.services import Services
 from media_lib.events.file_upload_event import FileUploadEvent
