@@ -111,11 +111,13 @@ class ChapterParser():
 
         logger.info("LOADING METADATA...")
 
+        metadata_file = f'{root_dir}/FFMETADATAFILE'
+
         stream = ffmpeg.input(file)
-        stream = ffmpeg.output(stream, 'FFMETADATAFILE', format='ffmetadata')
+        stream = ffmpeg.output(stream, metadata_file, format='ffmetadata')
         ffmpeg.run(stream, overwrite_output=True, quiet=True)
 
-        with open("FFMETADATAFILE", "a") as f:
+        with open(metadata_file, "a") as f:
 
             for i in range(chapter_count):
                 chapter = chapters[i]
@@ -135,5 +137,5 @@ title={title}
         
         logger.info("APPLYING METADATA...")
         stream = ffmpeg.input(file)
-        stream = ffmpeg.output(stream, os.path.join(root_dir, 'Chapters', f"{file.rsplit('/', 1)[1]}"), i = 'FFMETADATAFILE', map_metadata = 1, codec = 'copy')
+        stream = ffmpeg.output(stream, os.path.join(root_dir, 'Chapters', f"{file.rsplit('/', 1)[1]}"), i = metadata_file, map_metadata = 1, codec = 'copy')
         ffmpeg.run(stream, overwrite_output=True, quiet=True)
