@@ -2,10 +2,13 @@ import ffmpeg
 import re
 from threading import Thread
 from subprocess import Popen
+from media_lib.utils.logging_util import LoggingUtil
 import os
 
 SCREEN = "SCREEN"
 AUDIO = "AUDIO"
+
+logger = LoggingUtil.get_logger()
 
 REGEX = {
     SCREEN: {
@@ -65,7 +68,7 @@ class ChapterParser():
         return self.detect_null_av(file, AUDIO, result, n="-50dB", d=0.001)
 
     def get_commercial_blocks(self, file: str):
-        print("RETRIEVING COMMERCIAL BLOCKS")
+        logger.info("RETRIEVING COMMERCIAL BLOCKS")
         duration = float(ffmpeg.probe(file).get('format', {}).get('duration', 0))
 
         black_spots = []
@@ -97,7 +100,7 @@ class ChapterParser():
                 )
 
                 count += 1
-        print("RETRIEVED")
+        logger.info("RETRIEVED")
         return duration, blocks
 
 
@@ -106,7 +109,7 @@ class ChapterParser():
         text = ""
         chapter_count = len(chapters)
 
-        print("LOADING METADATA...")
+        logger.info("LOADING METADATA...")
 
         stream = ffmpeg.input(file)
         stream = ffmpeg.output(stream, 'FFMETADATAFILE', format='ffmetadata')
@@ -126,11 +129,11 @@ START={start * 1000}
 END={end * 1000}
 title={title}
 """
-                print(f"Added commercial block at {self.seconds_to_timestamp(start)}") 
+                logger.info(f"Added commercial block at {self.seconds_to_timestamp(start)}") 
             f.write(text)
             f.close()
         
-        print("APPLYING METADATA...")
+        logger.info("APPLYING METADATA...")
         stream = ffmpeg.input(file)
         stream = ffmpeg.output(stream, os.path.join(root_dir, 'Chapters', f"{file.rsplit('/', 1)[1]}"), i = 'FFMETADATAFILE', map_metadata = 1, codec = 'copy')
         ffmpeg.run(stream, overwrite_output=True, quiet=True)

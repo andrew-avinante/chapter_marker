@@ -11,7 +11,7 @@ setup(
     install_requires=["kafka-python", "media-lib", "ffmpeg-python"],
     entry_points={
         "console_scripts": [
-            "chapter-svc=src.app:main"
+            "chapter-svc=src.chapter_marker:main"
         ]
     },
 )
