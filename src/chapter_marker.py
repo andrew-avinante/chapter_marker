@@ -37,8 +37,8 @@ def main():
     for event in load_queue(host, Services.CHAPTER_SVC, 'mu.chapterSvc'):
         try:
             chapter_parser = ChapterParser(start_threshold=event.metadata.episode.start_threshold, end_threshold=event.metadata.episode.end_threshold)
-            chapter_parser.insert_chapter_markers(os.path.join(root_dir, event.finished_location), root_dir)
-            send_event(FileUploadEvent(event.run_id, Services.VIDEO_UPLOAD_SVC.value, event.metadata, event.finished_location), host)
+            output_path = chapter_parser.insert_chapter_markers(os.path.join(root_dir, event.finished_location), root_dir)
+            send_event(FileUploadEvent(event.run_id, Services.VIDEO_UPLOAD_SVC.value, event.metadata, output_path), host)
         except Exception as e:
             logger.error(f"Failed to add chapters: {str(e)}")
             send_error(e, event, Services.CHAPTER_SVC, host)

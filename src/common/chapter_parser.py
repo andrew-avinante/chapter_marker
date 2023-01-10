@@ -136,6 +136,9 @@ title={title}
             f.close()
         
         logger.info("APPLYING METADATA...")
+        output_path = os.path.join('Chapters', f"{file.rsplit('/', 1)[1]}")
+        absolute_path = os.path.join(root_dir, output_path)
         stream = ffmpeg.input(file)
-        stream = ffmpeg.output(stream, os.path.join(root_dir, 'Chapters', f"{file.rsplit('/', 1)[1]}"), i = metadata_file, map_metadata = 1, codec = 'copy')
+        stream = ffmpeg.output(stream, absolute_path, i = metadata_file, map_metadata = 1, codec = 'copy')
         ffmpeg.run(stream, overwrite_output=True, quiet=True)
+        return output_path
