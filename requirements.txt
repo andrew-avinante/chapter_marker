@@ -1,5 +1,5 @@
 --extra-index-url https://nexus.crookedcactus.net/repository/pypi-group/simple
-media-lib==1.0.2
+media-lib==1.0.5
 kafka-python==2.0.2
 systemd==0.16.1
 twine==4.0.2

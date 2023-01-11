@@ -5,6 +5,8 @@ from media_lib.events.services import Services
 from media_lib.events.file_upload_event import FileUploadEvent
 from media_lib.utils.logging_util import LoggingUtil
 import os
+import queue
+import threading
 
 LoggingUtil.set_logger_name("Chapter Marker Service")
 logger = LoggingUtil.get_logger()
@@ -33,8 +35,10 @@ def main():
 
     host = args.get('kafka_host')
     root_dir = args.get('root_dir')
-
-    for event in load_queue(host, Services.CHAPTER_SVC, 'mu.chapterSvc'):
+    q = queue.Queue()
+    threading.Thread(target=load_queue, args=(q, host, Services.CHAPTER_SVC, 'mu.chapterSvc')).start()
+    while True:
+        event = q.get()
         try:
             chapter_parser = ChapterParser(start_threshold=event.metadata.episode.start_threshold, end_threshold=event.metadata.episode.end_threshold)
             output_path = chapter_parser.insert_chapter_markers(os.path.join(root_dir, event.finished_location), root_dir)
